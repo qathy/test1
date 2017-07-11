@@ -13,4 +13,4 @@ class QuotesToscrape(scrapy.Spider):
                'text': quote.css('span.text::text').extract_first(),
                'tags': quote.css('a.tag::text').extract(),
               }
-            yeld item
+            yield item
