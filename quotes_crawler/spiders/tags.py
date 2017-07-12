@@ -15,7 +15,7 @@ class QuotesToscrape(scrapy.Spider):
         if tag_head:
             tag = self.all_tags[tag_head]
             tag['visited'] = True
-            tag['#quotes'] = tag['#quotes'] + quotes.count()
+            tag['#quotes'] += len(quotes)
             if not next_page_url:
                 yield tag
                 sample = quotes[0]
@@ -39,7 +39,7 @@ class QuotesToscrape(scrapy.Spider):
             if not tag['visited']:
                 next_tag_url = response.urljoin(tag['url'])
                 yield scrapy.Request(url=next_tag_url, callback=self.parse)
-                break
+                # break commenting this line may lead to visit several times each tag page
         # visit next page if there's a next button
         if next_page_url:
             next_page_url = response.urljoin(next_page_url)
