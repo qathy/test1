@@ -1,7 +1,7 @@
 import scrapy
 
 class QuotesToscrape(scrapy.Spider):
-    name = "quotes"
+    name = "all_quotes"
     allowed_domains = [u'toscrape.com']
     start_urls = [u'http://quotes.toscrape.com/']
     
@@ -14,3 +14,7 @@ class QuotesToscrape(scrapy.Spider):
                'tags': quote.css('a.tag::text').extract(),
               }
             yield item
+        next_page_url = response.css('li.next > a::attr(href)').extract_first()
+        if next_page_url:
+            next_page_url = response.urljoin(next_page_url)
+            yield scrapy.Request(url=next_page_url, callback=self.parse)
