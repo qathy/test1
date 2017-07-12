@@ -13,7 +13,7 @@ class QuotesToscrape(scrapy.Spider):
         tag_head = response.css('h3 > a::text').extract_first()
         next_page_url = response.css('li.next > a::attr(href)').extract_first()
         if tag_head:
-            tag = all_tags[tag_head]
+            tag = self.all_tags[tag_head]
             tag['visited'] = true
             tag['#quotes'] = tag['#quotes'] + quotes.count()
             if not next_page_url:
@@ -28,14 +28,14 @@ class QuotesToscrape(scrapy.Spider):
             tags = quote.css('a.tag')
             for tag in tags:
                 tag_text = tag.css('a::text').extract_first()
-                if not tag_text in all_tags:
-                    all_tags[tag_text] = {
+                if not tag_text in self.all_tags:
+                    self.all_tags[tag_text] = {
                                           'url': tag.css('a::attr(href)').extract_first(),
                                           'visited': false,
                                           '#quotes': 0,
                                          }
         # visit one unvisited tag page
-        for tag in all_tags:
+        for tag in self.all_tags:
             if not tag['visited']:
                 next_page_url = response.urljoin(tag['url'])
                 yield scrapy.Request(url=next_page_url, callback=self.parse)
