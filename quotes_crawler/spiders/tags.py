@@ -16,7 +16,7 @@ class QuotesToscrape(scrapy.Spider):
             tag = all_tags[tag_head]
             tag['visited'] = true
             tag['#quotes'] = tag['#quotes'] + quotes.count()
-            if not next_page_url
+            if not next_page_url:
                 yield tag
                 sample = quotes[0]
                 yield {
