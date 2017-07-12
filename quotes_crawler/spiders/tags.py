@@ -5,6 +5,7 @@ class QuotesToscrape(scrapy.Spider):
     allowed_domains = [u'toscrape.com']
     start_urls = [u'http://quotes.toscrape.com/']
     all_tags = {}
+    all_quotes = set()
     
     def parse(self, response):
         self.log('I just visited: ' + response.url)
@@ -16,13 +17,15 @@ class QuotesToscrape(scrapy.Spider):
             tag = self.all_tags[tag_head]
             tag['visited'] = True
             tag['#quotes'] += len(quotes)
+            if 'author_sample' not in tag:
+                for sample in quotes:
+                    qt = sample.css('span.text::text').extract_first()
+                    if qt not in self.all_quotes:
+                        self.all_quotes.add(qt)
+                        tag['author_sample'] = sample.css('small.author::text').extract_first()
+                        tag['text_sample'] = qt
             if not next_page_url:
                 yield tag
-                sample = quotes[0]
-                yield {
-                       'author_name': sample.css('small.author::text').extract_first(),
-                       'text': sample.css('span.text::text').extract_first(),
-                      }
         # collect tags from any visited page
         for quote in quotes:
             tags = quote.css('a.tag')
@@ -30,14 +33,14 @@ class QuotesToscrape(scrapy.Spider):
                 tag_text = tag.css('a::text').extract_first()
                 if not tag_text in self.all_tags:
                     self.all_tags[tag_text] = {
-                                          'url': tag.css('a::attr(href)').extract_first(),
+                                          'url': response.urljoin(tag.css('a::attr(href)').extract_first()),
                                           'visited': False,
                                           '#quotes': 0,
                                          }
         # visit one unvisited tag page
-        for tag in self.all_tags.itervalues():
+        for tag in self.all_tags.values():  # to avoid runtime error if tags are added during the loop
             if not tag['visited']:
-                next_tag_url = response.urljoin(tag['url'])
+                next_tag_url = tag['url']
                 yield scrapy.Request(url=next_tag_url, callback=self.parse)
                 # break commenting this line may lead to visit several times each tag page
         # visit next page if there's a next button
