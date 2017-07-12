@@ -35,10 +35,11 @@ class QuotesToscrape(scrapy.Spider):
                                           '#quotes': 0,
                                          }
         # visit one unvisited tag page
-        for tag in self.all_tags:
+        for tag in self.all_tags.itervalues():
             if not tag['visited']:
-                next_page_url = response.urljoin(tag['url'])
-                yield scrapy.Request(url=next_page_url, callback=self.parse)
+                next_tag_url = response.urljoin(tag['url'])
+                yield scrapy.Request(url=next_tag_url, callback=self.parse)
+                break
         # visit next page if there's a next button
         if next_page_url:
             next_page_url = response.urljoin(next_page_url)
