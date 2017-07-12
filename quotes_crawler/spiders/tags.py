@@ -14,7 +14,7 @@ class QuotesToscrape(scrapy.Spider):
         next_page_url = response.css('li.next > a::attr(href)').extract_first()
         if tag_head:
             tag = self.all_tags[tag_head]
-            tag['visited'] = true
+            tag['visited'] = True
             tag['#quotes'] = tag['#quotes'] + quotes.count()
             if not next_page_url:
                 yield tag
@@ -31,7 +31,7 @@ class QuotesToscrape(scrapy.Spider):
                 if not tag_text in self.all_tags:
                     self.all_tags[tag_text] = {
                                           'url': tag.css('a::attr(href)').extract_first(),
-                                          'visited': false,
+                                          'visited': False,
                                           '#quotes': 0,
                                          }
         # visit one unvisited tag page
