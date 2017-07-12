@@ -15,7 +15,7 @@ class QuotesToscrape(scrapy.Spider):
         next_page_url = response.css('li.next > a::attr(href)').extract_first()
         if tag_head:
             tag = self.all_tags[tag_head]
-            tag['visited'] = True
+            tag['visited'] += 1
             tag['#quotes'] += len(quotes)
             if 'author_sample' not in tag:
                 for sample in quotes:
@@ -24,7 +24,7 @@ class QuotesToscrape(scrapy.Spider):
                         self.all_quotes.add(qt)
                         tag['author_sample'] = sample.css('small.author::text').extract_first()
                         tag['text_sample'] = qt
-            if not next_page_url:
+            if not next_page_url: # wait to reach last page for the tag before sending the item
                 yield tag
         # collect tags from any visited page
         for quote in quotes:
@@ -34,7 +34,7 @@ class QuotesToscrape(scrapy.Spider):
                 if not tag_text in self.all_tags:
                     self.all_tags[tag_text] = {
                                           'url': response.urljoin(tag.css('a::attr(href)').extract_first()),
-                                          'visited': False,
+                                          'visited': 0,
                                           '#quotes': 0,
                                          }
         # visit one unvisited tag page
